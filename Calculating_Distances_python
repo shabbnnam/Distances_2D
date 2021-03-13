@@ -1,0 +1,31 @@
+def Distances(x, y, L, N):                         # all possible directed distances between each pair in 2D
+                                                   # takes x,y in 1D array of the current positions
+                                                   # N is the number of particles, L is the length of the simulation box to apply PBC.
+    
+    X1,X2 = np.meshgrid(x,x)                       # x is the vector of the current position of the particle on x coordinate,
+                                                   # This makes a meshgrid of the position of all particles along x.
+    Y1,Y2 = np.meshgrid(y,y)
+
+    distx = (X2 - X1)                              # Displacements' matrix on x with zero on the diagonal
+    distx -= L * np.round(distx / L)               # PBC(Periodic boundary conditions)
+    distx = np.triu(distx, k=1)                    # takes only upper triangle
+    
+    
+    disty = (Y2 - Y1)
+    disty -= L * np.round(disty / L)
+    disty = np.triu(disty, k=1)
+
+    r = np.sqrt((( distx )**2 + ( disty )**2 ))    # Distance matrix only upper triangle
+
+    
+    dr_dx = np.divide(distx, r)                    # to calculate the force acting on i from j: dr/dx = (xi- xj)/r 
+    dr_dx = np.triu(dr_dx, k=1)                    # because devide on zero take the upper triangle to remove the nan
+    dr_dx = dr_dx - np.transpose(dr_dx)            # make a matrix with zero on diagonal
+                                                   # dr_dx needed to calculate the force in 2D
+
+    dr_dy = np.divide(disty, r) 
+    dr_dy = np.triu(dr_dy, k=1) 
+    dr_dy = dr_dy -np.transpose(dr_dy)
+
+    
+    return dr_dx, dr_dy, distx, disty   
